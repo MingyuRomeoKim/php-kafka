@@ -3,9 +3,9 @@
 namespace MingyuKim\PhpKafka\Traits;
 
 /**
- * 싱글톤
+ * 클래스를 쉽게 싱글톤으로 만들어주는 trait
  */
-trait TraitSingleton
+trait SingletonTrait
 {
     private static $instanse = null;
 
