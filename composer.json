@@ -1,0 +1,30 @@
+{
+    "name": "mingyukim/php-kafka",
+    "description": "PHP로 카프카 컨슈밍,프로듀싱 쉽게 사용하기",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "MingyuRomeoKim",
+            "email": "rlaalsrb0466@naver.com",
+            "homepage": "https://kimmingyu.co.kr",
+            "role": "Developer"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MingyuKim\\PhpKafka\\PhpKafkaProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "MingyuKim\\PhpKafka\\": "src/"
+        },
+        "classmap": ["src/"]
+    }
+}
