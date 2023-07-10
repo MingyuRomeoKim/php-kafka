@@ -125,6 +125,7 @@ class KafkaConsumer extends KafkaAbstract
         switch ($message->err) {
             case RD_KAFKA_RESP_ERR_NO_ERROR:
                 $error_code = '000';
+                $this->processMessage($message);
                 break;
             case RD_KAFKA_RESP_ERR__PARTITION_EOF:
                 $error_code = '404';
@@ -140,4 +141,17 @@ class KafkaConsumer extends KafkaAbstract
         return $message;
     }
 
+
+    /**
+     * Process the consumed message
+     *
+     * @param \RdKafka\Message $message
+     *
+     * @return void
+     */
+    protected function processMessage(\RdKafka\Message $message): void
+    {
+        // Add your business logic here. For example:
+        echo "Received message with key: {$message->key} and payload: {$message->payload}\n";
+    }
 }

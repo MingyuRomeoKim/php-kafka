@@ -56,18 +56,14 @@ class KafkaProducer extends KafkaAbstract
     public function produce(string $topic, string $message): void
     {
         try {
-            if (!$topic) {
-                exit();
-            }
-
-            if (!$this->topicExists($topic)) {
-                exit();
+            if (!$topic || !$this->topicExists($topic)) {
+                throw new \Exception("Invalid topic: {$topic}");
             }
 
             $topic = $this->connect->newTopic($topic);
             $topic->produce(RD_KAFKA_PARTITION_UA, 0, $message);
             $this->connect->poll(self::WAITING_FOR_EVENTS);
-            
+
             while ($this->connect->getOutQLen() > 0) {
                 $this->connect->poll(self::WAITING_FOR_EVENTS);
             }
@@ -75,5 +71,11 @@ class KafkaProducer extends KafkaAbstract
             dump('Kafka Produce produce error :: ');
             dump($exception->getMessage());
         }
+    }
+
+
+    public function newTopic(string $topicName, \RdKafka\Conf $conf)
+    {
+        return $this->connect->newTopic($topicName, $conf);
     }
 }
