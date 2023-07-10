@@ -1,11 +1,10 @@
 # php-kafka
-php를 사용해서 카프카 컨슈밍 프로듀싱 쉽게 하기
-
+using kafka with php
 
 ## KafkaConsumer
 
-`KafkaConsumer`는 카프카에서 메세지를 컨슈밍 합니다. <br/>
-기본 사용법:
+`KafkaConsumer` is a class for consuming messages from Kafka.<Br/>
+Below is a basic usage example:
 
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaConsumer;
@@ -26,14 +25,12 @@ while (true) {
     $message = $consumer->consume(1); // wait for up to 1 second
     // Process the message as needed...
 }
-
 ```
 
-## KafkaProducer
+## KafkaConsumer
 
-`KafkaProducerClass`는 카프카에서 메세지를 프로듀싱 합니다. <br/>
-기본 사용법:
-
+KafkaProducer is a class for producing messages to Kafka. <br/>
+Below is a basic usage example:
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaProducer;
 
@@ -46,4 +43,6 @@ $producer->setBootstrapServers('localhost:9092');
 
 // Produce a message to a topic
 $producer->produce('my-topic', 'my message');
+
+}
 ```
