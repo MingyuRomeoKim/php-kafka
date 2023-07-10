@@ -70,7 +70,7 @@ class KafkaConsumer extends KafkaAbstract
     }
 
     /**
-     * 토픽 구독 종료 하
+     * 토픽 구독 종료 하기
      */
     public function unsubscribe(): void
     {

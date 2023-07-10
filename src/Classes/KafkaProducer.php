@@ -11,6 +11,11 @@ class KafkaProducer extends KafkaAbstract
     use SingletonTrait, ProducerConfigTrait;
 
     /**
+     * @var integer 이벤트 대기 시간(ms)
+     */
+    const WAITING_FOR_EVENTS = 1000;
+
+    /**
      * @param \RdKafka\TopicConf $config
      * @return \RdKafka\Producer|null
      */
@@ -46,5 +51,29 @@ class KafkaProducer extends KafkaAbstract
         }
 
         return $conf;
+    }
+
+    public function produce(string $topic, string $message): void
+    {
+        try {
+            if (!$topic) {
+                exit();
+            }
+
+            if (!$this->topicExists($topic)) {
+                exit();
+            }
+
+            $topic = $this->connect->newTopic($topic);
+            $topic->produce(RD_KAFKA_PARTITION_UA, 0, $message);
+            $this->connect->poll(self::WAITING_FOR_EVENTS);
+            
+            while ($this->connect->getOutQLen() > 0) {
+                $this->connect->poll(self::WAITING_FOR_EVENTS);
+            }
+        } catch (\Exception $exception){
+            dump('Kafka Produce produce error :: ');
+            dump($exception->getMessage());
+        }
     }
 }
