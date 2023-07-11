@@ -182,20 +182,15 @@ return [
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaConsumer;
 
-// Create a consumer instance
-$consumer = KafkaConsumer::getInstance();
+// consumer instance 생성하기
+$kafkaConsumer = KafkaConsumer::getInstance();
 
-// Set configuration
-$consumer->setBootstrapServers('localhost:9092');
-$consumer->setGroupId('my-group');
-// ... set other configuration as needed ...
+// 토픽 구독하기
+$kafkaConsumer->subscribe('test-topic');
 
-// Subscribe to topics
-$consumer->subscribe(['topic1', 'topic2']);
-
-// Consume messages in a loop
+// 메세지 컨슘하기
 while (true) {
-    $message = $consumer->consume(1); // wait for up to 1 second
+    $message = $kafkaConsumer->consume(1); // wait for up to 1 second
     // Process the message as needed...
 }
 

@@ -34,7 +34,7 @@ class KafkaConsumer extends KafkaAbstract
         $conf->set('log_level', $this->getLogLevel());
         $conf->set('debug', $this->getDebug());
 
-        if (!is_null($this->getSaslMechanisms())) {
+        if (!empty($this->getSaslMechanisms())) {
             // SASL Authentication
             $conf->set('sasl.mechanisms', $this->getSaslMechanisms());
             $conf->set('sasl.username', $this->getSaslUsername());
@@ -42,7 +42,7 @@ class KafkaConsumer extends KafkaAbstract
             $conf->set('ssl.endpoint.identification.algorithm', $this->getSslEndpointIdentificationAlgorithm());
         }
 
-        if (!is_null($this->getSecurityProtocol())) {
+        if (!empty($this->getSecurityProtocol())) {
             // SSL Authentication
             $conf->set('security.protocol', $this->getSecurityProtocol());
             $conf->set('ssl.ca.location', $this->getSslCaLocation());
@@ -153,5 +153,10 @@ class KafkaConsumer extends KafkaAbstract
     {
         // Add your business logic here. For example:
         echo "Received message with key: {$message->key} and payload: {$message->payload}\n";
+    }
+
+    public function newTopic(string $topicName, \RdKafka\Conf $conf)
+    {
+        return $this->connect->newTopic($topicName, $conf);
     }
 }
