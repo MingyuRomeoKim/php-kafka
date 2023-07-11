@@ -32,16 +32,17 @@ abstract class KafkaAbstract
     /*
      * 하위 클래스에서 재정의
      */
-    abstract protected function connect(\RdKafka\TopicConf $config): \RdKafka\KafkaConsumer|\RdKafka\Producer|null;
+    abstract protected function connect(\RdKafka\Conf $config): \RdKafka\KafkaConsumer|\RdKafka\Producer|null;
     abstract protected function getConfig(): \RdKafka\Conf|null;
     abstract public function newTopic(string $topicName, \RdKafka\Conf $conf);
 
     protected function topicExists(string $topicName): bool
     {
         $metadata = $this->connect->getMetadata(true, null, 60*1000);
+
         $topics = $metadata->getTopics();
         foreach ($topics as $topic) {
-            if ($topic->getName() === $topicName) {
+            if ($topic->getTopic() === $topicName) {
                 return true;
             }
         }

@@ -15,11 +15,13 @@ class KafkaProducer extends KafkaAbstract
      */
     const WAITING_FOR_EVENTS = 1000;
 
+    private \RdKafka\Conf|null $config;
+
     /**
-     * @param \RdKafka\TopicConf $config
+     * @param \RdKafka\Conf|null $config
      * @return \RdKafka\Producer|null
      */
-    protected function connect(\RdKafka\TopicConf $config): \RdKafka\Producer|null
+    protected function connect(\RdKafka\Conf $config): \RdKafka\Producer|null
     {
         return new \RdKafka\Producer($config);
     }
@@ -34,7 +36,7 @@ class KafkaProducer extends KafkaAbstract
         $conf->set('message.timeout.ms', $this->getMessageTimeoutMs());
         $conf->set('enable.idempotence', $this->getEnableIdempotence());
 
-        if (!is_null($this->getSaslMechanisms())) {
+        if (!empty($this->getSaslMechanisms())) {
             // SASL Authentication
             $conf->set('sasl.mechanisms', $this->getSaslMechanisms());
             $conf->set('sasl.username', $this->getSaslUsername());
@@ -42,7 +44,7 @@ class KafkaProducer extends KafkaAbstract
             $conf->set('ssl.endpoint.identification.algorithm', $this->getSslEndpointIdentificationAlgorithm());
         }
 
-        if (!is_null($this->getSecurityProtocol())) {
+        if (!empty($this->getSecurityProtocol())) {
             // SSL Authentication
             $conf->set('security.protocol', $this->getSecurityProtocol());
             $conf->set('ssl.ca.location', $this->getSslCaLocation());
@@ -56,6 +58,11 @@ class KafkaProducer extends KafkaAbstract
     public function produce(string $topic, string $message): void
     {
         try {
+            if (!$this->connect) {
+                $this->config = $this->getConfig();
+                $this->connect = $this->connect($this->config);
+            }
+
             if (!$topic || !$this->topicExists($topic)) {
                 throw new \Exception("Invalid topic: {$topic}");
             }
