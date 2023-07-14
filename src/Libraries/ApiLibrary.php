@@ -11,13 +11,14 @@ class ApiLibrary
     private ?string $apiUrl;
     private ?string $method;
     private ?array $requestData;
+    private DataLibrary $dataLibrary;
 
     /**
      * @return string|null
      */
     public function getApiUrl(): ?string
     {
-        return $this->apiUrl;
+        return $this->apiUrl ?? null;
     }
 
     /**
@@ -33,7 +34,7 @@ class ApiLibrary
      */
     public function getMethod(): ?string
     {
-        return $this->method;
+        return $this->method ?? null;
     }
 
     /**
@@ -49,7 +50,7 @@ class ApiLibrary
      */
     public function getRequestData(): ?array
     {
-        return $this->requestData;
+        return $this->requestData ?? null;
     }
 
     /**
@@ -62,12 +63,10 @@ class ApiLibrary
 
     public function sendRequest(string $returnType = 'string'): string|array
     {
+        $this->dataLibrary = DataLibrary::getInstance();
         $returnData = $this->request();
 
-        return match ($returnType) {
-            'string' => $returnData,
-            'array' => json_decode($returnData,true),
-        };
+        return $this->dataLibrary->convert(gettype($returnData), $returnType, $returnData);
     }
 
     private function request(): ?string
@@ -87,9 +86,10 @@ class ApiLibrary
 
     private function getOptions(): ?array
     {
+        $this->dataLibrary = DataLibrary::getInstance();
 
-        $returnData =  match (strtoupper($this->getMethod())) {
-            'GET' =>  [
+        $returnData = match (strtoupper($this->getMethod())) {
+            'GET' => [
                 'http' => [
                     'method' => 'GET',
                     'header' => 'Content-type: application/json',
@@ -97,9 +97,9 @@ class ApiLibrary
             ],
             'POST' => [
                 'http' => [
-                    'header' => 'Content-type: application/x-www-form-urlencoded\r\n',
+                    'header' => 'Content-type: application/json',
                     'method' => 'POST',
-                    'content' => http_build_query($this->getRequestData()),
+                    'content' => $this->dataLibrary->convert(gettype($this->getRequestData()), 'string', $this->getRequestData()),
                 ],
             ]
         };
