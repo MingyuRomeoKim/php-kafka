@@ -9,40 +9,44 @@ Below is a basic usage example:
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaConsumer;
 
-// Create a consumer instance
-$consumer = KafkaConsumer::getInstance();
+// create consumer and need object init
+$kafkaConsumer = KafkaConsumer::getInstance();
+$dataLibrary = DataLibrary::getInstance();
 
-// Set configuration
-$consumer->setBootstrapServers('localhost:9092');
-$consumer->setGroupId('my-group');
-// ... set other configuration as needed ...
+// subscribe topic
+$kafkaConsumer->subscribe('test-topic');
 
-// Subscribe to topics
-$consumer->subscribe(['topic1', 'topic2']);
-
-// Consume messages in a loop
+// read message
 while (true) {
-    $message = $consumer->consume(1); // wait for up to 1 second
+    $message = $kafkaConsumer->consume(1); // wait for up to 1 second
     // Process the message as needed...
+    $payload = $message->payload;
+    $payloadArray = $dataLibrary->convert(gettype($payload),'array',$payload);
+    dump($payloadArray);
 }
 ```
 
-## KafkaConsumer
+## KafkaProducer
 
 KafkaProducer is a class for producing messages to Kafka. <br/>
 Below is a basic usage example:
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaProducer;
 
-// Create a producer instance
+// producer and need object init
 $producer = KafkaProducer::getInstance();
+$apiLibrary = ApiLibrary::getInstance();
+$dataLibrary = DataLibrary::getInstance();
 
-// Set configuration
-$producer->setBootstrapServers('localhost:9092');
-// ... set other configuration as needed ...
+// make Test Json Data
+$apiLibrary->setApiUrl('https://jsonplaceholder.typicode.com/posts');
+$apiLibrary->setMethod('GET');
+$resultArray = $apiLibrary->sendRequest('array');
 
-// Produce a message to a topic
-$producer->produce('my-topic', 'my message');
+foreach ($resultArray as $result) {
+    $jsonResult = $dataLibrary->convert(gettype($result), 'string', $result);
 
+    //just produce
+    $producer->produce('test-topic',$jsonResult);
 }
 ```

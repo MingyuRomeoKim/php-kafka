@@ -182,16 +182,19 @@ return [
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaConsumer;
 
-// consumer instance 생성하기
+// consumer 및 필요 객체 초기화
 $kafkaConsumer = KafkaConsumer::getInstance();
-
-// 토픽 구독하기
+$dataLibrary = DataLibrary::getInstance();
+// 토픽 구독
 $kafkaConsumer->subscribe('test-topic');
 
-// 메세지 컨슘하기
+// messages 읽어오기
 while (true) {
     $message = $kafkaConsumer->consume(1); // wait for up to 1 second
     // Process the message as needed...
+    $payload = $message->payload;
+    $payloadArray = $dataLibrary->convert(gettype($payload),'array',$payload);
+    dump($payloadArray);
 }
 
 ```
@@ -204,9 +207,20 @@ while (true) {
 ```php
 use MingyuKim\PhpKafka\Classes\KafkaProducer;
 
-// producer instance 만들기
+// producer 및 필요 객체 초기화
 $producer = KafkaProducer::getInstance();
+$apiLibrary = ApiLibrary::getInstance();
+$dataLibrary = DataLibrary::getInstance();
 
-// 프로듀싱 하기
-$producer->produce('test-topic','이건 메세지야!');
+// 테스트 Json 데이터 생성
+$apiLibrary->setApiUrl('https://jsonplaceholder.typicode.com/posts');
+$apiLibrary->setMethod('GET');
+$resultArray = $apiLibrary->sendRequest('array');
+
+foreach ($resultArray as $result) {
+    $jsonResult = $dataLibrary->convert(gettype($result), 'string', $result);
+
+    //프로듀싱 하기
+    $producer->produce('test-topic',$jsonResult);
+}
 ```
