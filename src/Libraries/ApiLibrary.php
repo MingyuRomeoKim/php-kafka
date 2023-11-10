@@ -84,6 +84,51 @@ class ApiLibrary
         return $result;
     }
 
+    public function callAPI() {
+
+        $curl = curl_init();
+        $data = $this->getRequestData();
+        $url = $this->getApiUrl();
+
+        switch ($this->getMethod()) {
+            case "POST":
+                curl_setopt($curl, CURLOPT_POST, 1);
+
+                if ($data)
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                break;
+            case "GET":
+                if ($data)
+                    $url = sprintf("%s?%s", $url, http_build_query($data));
+                break;
+            default:
+                throw new Exception("Unsupported request type: $this->getMethod()");
+        }
+
+        // 공통 cURL 설정
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json'
+        ));
+
+        // SSL 설정
+        // curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        // 요청 실행 및 응답 저장
+        $result = curl_exec($curl);
+
+        // 에러 확인
+        if (!$result) {
+            die("Connection Failure");
+        }
+
+        curl_close($curl);
+
+        return $result;
+    }
+
     private function getOptions(): ?array
     {
         $this->dataLibrary = DataLibrary::getInstance();
