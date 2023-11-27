@@ -11,6 +11,7 @@ class ApiLibrary
     private ?string $apiUrl;
     private ?string $method;
     private ?array $requestData;
+    private ?array $header;
     private DataLibrary $dataLibrary;
 
     /**
@@ -61,6 +62,22 @@ class ApiLibrary
         $this->requestData = $requestData;
     }
 
+    /**
+     * @param array|null $header
+     */
+    public function setHeader(?array $header): void
+    {
+        $this->header = $header;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getHeader(): ?array
+    {
+        return $this->header;
+    }
+
     public function sendRequest(string $returnType = 'string'): string|array
     {
         $this->dataLibrary = DataLibrary::getInstance();
@@ -71,10 +88,11 @@ class ApiLibrary
 
     private function request(): ?string
     {
+
         $apiUrl = $this->getApiUrl();
         $options = $this->getOptions();
-
         $context = stream_context_create($options);
+
         $result = file_get_contents($apiUrl, false, $context);
 
         if ($result === FALSE) {
@@ -84,16 +102,22 @@ class ApiLibrary
         return $result;
     }
 
-    public function callAPI() {
+    public function callAPI(): mixed
+    {
 
         $curl = curl_init();
         $data = $this->getRequestData();
         $url = $this->getApiUrl();
+        $header = $this->getHeader();
 
+        if (!$header) {
+            $header = [
+                'Content-Type: application/json'
+            ];
+        }
         switch ($this->getMethod()) {
             case "POST":
                 curl_setopt($curl, CURLOPT_POST, 1);
-
                 if ($data)
                     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
                 break;
@@ -108,11 +132,10 @@ class ApiLibrary
         // 공통 cURL 설정
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json'
-        ));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
 
         // SSL 설정
+        // 실제 운영 환경에서는 SSL 검증을 하지 않는 것을 권장하지 않습니다.
         // curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -138,6 +161,7 @@ class ApiLibrary
                 'http' => [
                     'method' => 'GET',
                     'header' => 'Content-type: application/json',
+                    'content' => $this->dataLibrary->convert(gettype($this->getRequestData()), 'string', $this->getRequestData()),
                 ],
             ],
             'POST' => [
